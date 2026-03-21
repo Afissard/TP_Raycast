@@ -30,8 +30,10 @@ class ObstacleManager {
         for (int i = 0; i < count; i++) {
             float w = random(40, 140);
             float h = random(40, 140);
-            float x = random(0, width - w);
-            float y = random(0, height - h);
+            // float x = random(0, width - w);
+            // float y = random(0, height - h);
+            float x = random(0, WORLD_WIDTH - w);
+            float y = random(0, WORLD_HEIGHT - h);
 
             obstacles.add(new RectObstacle(x, y, w, h));
         }
@@ -40,8 +42,10 @@ class ObstacleManager {
     void generateRandomCircles(int count) {
         for (int i = 0; i < count; i++) {
             float r = random(20, 60);
-            float x = random(r, width - r);
-            float y = random(r, height - r);
+            // float x = random(r, width - r);
+            // float y = random(r, height - r);
+            float x = random(r, WORLD_WIDTH - r);
+            float y = random(r, WORLD_HEIGHT - r);
             
             obstacles.add(new CircleObstacle(x, y, r));
         }
@@ -49,7 +53,8 @@ class ObstacleManager {
 
     void generateRandomTriangles(int count) {
         for (int i = 0; i < count; i++) {
-            PVector v1 = new PVector(random(width), random(height));
+            //PVector v1 = new PVector(random(width), random(height));
+            PVector v1 = new PVector(random(WORLD_WIDTH), random(WORLD_HEIGHT));
             PVector v2 = PVector.add(v1, new PVector(random(-80, 80), random(-80, 80)));
             PVector v3 = PVector.add(v1, new PVector(random(-80, 80), random(-80, 80)));
             

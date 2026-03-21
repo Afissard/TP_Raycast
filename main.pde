@@ -1,19 +1,22 @@
 // Ray Casting Implementation
 
-// Define the number of rays to cast
-int numRays = 50;
-// Define the maximum distance for ray casting
-float maxDistance = 200;
-// Define the number of obstacles to generate
+final int WORLD_WIDTH = 800;
+final int WORLD_HEIGHT = 600;
+final int VIEW3D_WIDTH = 600;
+
+int numRays = 140;
+float maxDistance = 350;
 int numObstacles = 10;
+float fov = PI / 2.0;
+
+boolean useCastV2 = false;
 
 Player player;
 ObstacleManager obstacleManager;
+RayHit[] hits;
 
 void settings() {
-    // Call init in settings to ensure it runs before setup
-    // Use P2D renderer for better performance with many rays
-    size(800, 600, P2D);
+    size(WORLD_WIDTH + VIEW3D_WIDTH, WORLD_HEIGHT, P2D);
 }
 
 void setup() {
@@ -21,6 +24,8 @@ void setup() {
 
     obstacleManager = new ObstacleManager();
     obstacleManager.generateRandomObstacles(numObstacles);
+
+    hits = new RayHit[numRays];
 }
 
 void draw() {
@@ -33,11 +38,27 @@ void draw() {
     player.display();
 
     // Cast rays (semicircle centered on view direction)
+    // for (int i = 0; i < numRays; i++) {
+    //     float angleOffset = map(i, 0, numRays - 1, -PI / 2, PI / 2);
+    //     PVector rayDir = PVector.fromAngle(player.dir.heading() + angleOffset);
+    //     castRay(rayDir, player.pos);
+    // }
+
+    // Cast rays and keep hit info for 3D view
     for (int i = 0; i < numRays; i++) {
-        float angleOffset = map(i, 0, numRays - 1, -PI / 2, PI / 2);
+        float angleOffset = map(i, 0, numRays - 1, -fov / 2.0, fov / 2.0);
         PVector rayDir = PVector.fromAngle(player.dir.heading() + angleOffset);
-        castRay(rayDir, player.pos);
+        hits[i] = castRay(rayDir, player.pos, angleOffset);
     }
+    
+    draw3DView();
+
+    // Divider + HUD
+    stroke(255, 80);
+    line(WORLD_WIDTH, 0, WORLD_WIDTH, WORLD_HEIGHT);
+
+    fill(255);
+    text("Ray mode: " + (useCastV2 ? "V2 (coarse+refine)" : "V1 (pixel march)") + "\n[V] switch raycast function\n[R] regenerate", 10, 18);
 }
 
 void keyPressed() {
@@ -47,42 +68,35 @@ void keyPressed() {
         obstacleManager.clearObstacles();
         obstacleManager.generateRandomObstacles(numObstacles);
     }
+
+    if (key == 'v' || key == 'V') useCastV2 = !useCastV2;
 }
 
 void keyReleased() {
     player.handleKeyRelease(keyCode);
 }
 
-void castRay(PVector rayDir, PVector playerPos) {
-    // Normalize the ray direction
-    rayDir.normalize();
-    // Initialize the ray's current position
-    PVector rayPos = playerPos.copy();
+void draw3DView() {
+    float panelX = WORLD_WIDTH;
+    float colW = (float) VIEW3D_WIDTH / numRays;
 
-    // Cast the ray until it reaches max distance
-    for (float d = 0; d < maxDistance; d += 1) {
-        rayPos.add(PVector.mult(rayDir, 1)); // Move the ray in the direction
+    // background (ceiling + floor)
+    noStroke();
+    fill(20, 20, 30);
+    rect(panelX, 0, VIEW3D_WIDTH, WORLD_HEIGHT / 2.0);
+    fill(30, 25, 20);
+    rect(panelX, WORLD_HEIGHT / 2.0, VIEW3D_WIDTH, WORLD_HEIGHT / 2.0);
 
-        // Stop if out of screen
-        if (rayPos.x < 0 || rayPos.x > width || rayPos.y < 0 || rayPos.y > height) {
-            break;
-        }
+    for (int i = 0; i < numRays; i++) {
+        RayHit h = hits[i];
+        if (h == null || !h.hit) continue;
 
-        // Stop if hits obstacle
-        if (obstacleManager.hitsObstacle(rayPos.x, rayPos.y)) {
-            stroke(255, 220, 100);
-            line(playerPos.x, playerPos.y, rayPos.x, rayPos.y);
+        float d = max(1.0, h.distance);
+        float wallH = min(WORLD_HEIGHT, (WORLD_HEIGHT * 90.0) / d);
+        float y = (WORLD_HEIGHT - wallH) * 0.5;
 
-            // Hit marker
-            noStroke();
-            fill(255, 180, 80);
-            circle(rayPos.x, rayPos.y, 4);
-            return;
-        }
+        float shade = map(d, 0, maxDistance, 255, 30);
+        fill(shade, shade * 0.9, shade * 0.7);
+        rect(panelX + i * colW, y, colW + 1, wallH);
     }
-
-    // If no hit, draw full ray
-    stroke(255, 100);
-    line(playerPos.x, playerPos.y, rayPos.x, rayPos.y);
 }
-
