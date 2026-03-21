@@ -22,6 +22,10 @@ class ObstacleManager {
         return false;
     }
 
+    void clearObstacles() {
+        obstacles.clear();
+    }
+
     void generateRandomRectangles(int count) {
         for (int i = 0; i < count; i++) {
             float w = random(40, 140);

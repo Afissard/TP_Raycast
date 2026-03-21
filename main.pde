@@ -1,7 +1,7 @@
 // Ray Casting Implementation
 
 // Define the number of rays to cast
-int numRays = 25;
+int numRays = 50;
 // Define the maximum distance for ray casting
 float maxDistance = 200;
 // Define the number of obstacles to generate
@@ -10,9 +10,13 @@ int numObstacles = 10;
 Player player;
 ObstacleManager obstacleManager;
 
-void setup() {
-    size(800, 600);
+void settings() {
+    // Call init in settings to ensure it runs before setup
+    // Use P2D renderer for better performance with many rays
+    size(800, 600, P2D);
+}
 
+void setup() {
     player = new Player(width / 2, height / 2);
 
     obstacleManager = new ObstacleManager();
@@ -38,6 +42,11 @@ void draw() {
 
 void keyPressed() {
     player.handleKeyPress(keyCode);
+
+    if (key == 'r' || key == 'R') {
+        obstacleManager.clearObstacles();
+        obstacleManager.generateRandomObstacles(numObstacles);
+    }
 }
 
 void keyReleased() {
