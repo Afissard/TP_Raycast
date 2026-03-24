@@ -29,8 +29,6 @@ class Player {
         if (leftPressed)    pos.sub(PVector.mult(right, moveSpeed));
 
         // Keep player inside screen
-        // pos.x = constrain(pos.x, 0, width);
-        // pos.y = constrain(pos.y, 0, height);
         pos.x = constrain(pos.x, 0, WORLD_WIDTH);
         pos.y = constrain(pos.y, 0, WORLD_HEIGHT);
     }

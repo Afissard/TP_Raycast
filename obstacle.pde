@@ -50,10 +50,10 @@ class CircleObstacle extends Obstacle {
     }
 }
 
-class triangleObstacle extends Obstacle {
+class TriangleObstacle extends Obstacle {
     PVector v1, v2, v3;
 
-    triangleObstacle(PVector v1, PVector v2, PVector v3) {
+    TriangleObstacle(PVector v1, PVector v2, PVector v3) {
         this.v1 = v1;
         this.v2 = v2;
         this.v3 = v3;
